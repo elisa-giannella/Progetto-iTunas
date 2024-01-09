@@ -1,0 +1,94 @@
+NUOVO PROGETTO
+- laravel new
+- npm install
+- npm i bootstrap
+- assets -> app.js | app.css
+- components
+
+SERVER
+- php artisan serve
+- npm run dev
+
+DATABASE
+- nuovo database
+- .env -> collegare DB
+
+PROGETTAZIONE
+- sezione artisti
+    make:model -mcr Artist
+    - form
+        / get
+            - rotta -> get -> create
+            - controller -> create() -> return view()
+            - vista -> method="POST" action="{{ route('artist.store') }}" | @csrf | name
+        / post
+            - rotta -> post -> store
+            - controller -> store()
+                 MASS ASSIGNMENT -> modello -> $fillable
+                 redirect()->route()->with('succes','messaggio')
+            - vista -> collection (dopo) -> if(session()->has('success')) {{ session('success') }}
+        / migration
+            - up()
+    php artisan migrate
+    - index
+        - rotta -> get
+        - controller -> index()
+            $artists = Artist::all();
+            return view('artists.collection', compact('artists'));
+        - vista -> collection -> foreach($artists as $artist) ... {{ $artist->name }}
+                    -> [relativo al post -> if(session()->has('success')) {{ session('success') }} ]
+
+    NUOVO ATTRIBUTO
+    make:migration add_img_column_to_artists_table
+    - add migration
+        - up() -> $table->string('img')->after('language')
+        - down() -> $table->dropColumn('img')
+    - Artist model
+        - $fillable
+    - form
+        - rotta ok
+        - controller -> store() -> "img"=>$request->file('artistImg')->store('public/images')
+            oppure:
+            $file = $request->file('artistImg');
+                Artist::create([
+                    ...
+                    "img"=> $file ? $file->store('public/images') : 'public/images/default.png'
+                ])
+        - vista
+            create -> form enctype="multipart/form-data" | input type="file"
+            collection -> img href="{{ Storage::url($artist->img) }}"
+    STORAGE LINK
+    php artisan storage:link
+
+    VALIDATIONS
+    -> nuova Request -> php artisan make:request ArtistStoreRequest
+    - ArtistStoreRequest
+        - rules()
+            return ["name"=>"required|string", "genre" => "required|string", ... ];
+        - authorize()
+            return true;
+        - messages()
+            return ["name.required" => "Compilare questo campo.", ... ];
+    - form
+        - rotta ok
+        - controller -> store() -> Request>ArtistStoreRequest
+        - vista @error('name') <div> {{ $message }} </div> @enderror
+            - div -> text-error
+            - input -> @error is-invalid @enderror
+
+- sezione concerti
+   // php artisan make:model -mcr Live
+
+    - form
+        / get
+        / post
+
+    - index
+
+    NUOVI ATTRIBUTI
+    php artisan make:migration add_img
+
+    // TODO da finire:
+        - VALIDATIONS (@error ecc)
+    / da fare:
+        - pagine dettagli
